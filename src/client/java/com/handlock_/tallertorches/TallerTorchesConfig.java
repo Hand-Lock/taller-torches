@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ * Copyright (C) 2025 HandLock_
+ */
+
+
 package com.handlock_.tallertorches;
 
 import com.google.gson.Gson;

@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "tallertorches",
 	"version": "${version}",
-	"name": "Taller Torches",
-	"description": "Adds taller torches!",
+	"name": "Taller Torches: Hitbox & Particle Fix",
+	"description": "A micro-mod that resizes torch collision/outline boxes and moves their flame particles so tall torch textures finally look right.",
 	"authors": [
 		"HandLock_"
 	],
@@ -11,7 +11,7 @@
 		"homepage": "https://modrinth.com/project/taller-torches",
 		"sources": "https://github.com/Hand-Lock/taller-torches"
 	},
-	"license": "CC0-1.0",
+	"license": "LGPL-3.0-or-later",
 	"icon": "assets/tallertorches/icon.png",
 	"environment": "client",
 
