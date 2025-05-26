@@ -4,53 +4,61 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/** Tiny self-contained config. */
+/** Singleton con un solo parametro: altezza torcia in px (vanilla = 10). */
 public final class TallerTorchesConfig {
 
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
+    private static final Logger LOGGER = LoggerFactory.getLogger("TallerTorches");
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE = FabricLoader.getInstance()
             .getConfigDir().resolve("tallertorches.json");
 
-    /** valori di fallback / default */
-    public double offset_y    = 0.1875;  // 3 px
-    public double offset_face = 0.1250;  // 2 px
+    // ---------------------- campo esposto all'utente ----------------------
+    public int torch_height_px = 13;          // default: torcia "più lunga" di 3 px
 
-    // --- Singleton ---------------------------------------------------------
+    // ---------------------- derivate, NON salvate ------------------------
+    public transient double offset_y;         // +Δpx / 16
+    public transient double offset_face;      // |Δpx| * tan(22.5°) / 16
 
     private static TallerTorchesConfig INSTANCE;
+    private static final int VANILLA_PX = 10;
+    private static final double TAN_22_5 = Math.tan(Math.toRadians(22.5));
 
+    /* --------------------------------------------------------------------- */
     public static TallerTorchesConfig get() {
         if (INSTANCE == null) load();
         return INSTANCE;
     }
 
-    // --- Lettura / scrittura ----------------------------------------------
+    /* ---- IO ---------------------------------------------------------------- */
 
-    public static void load() {
+    private static void load() {
         try {
-            if (Files.notExists(FILE)) {
-                saveDefault();                   // crea file con default leggibili
-            }
-            String json = Files.readString(FILE);
-            INSTANCE = GSON.fromJson(json, TallerTorchesConfig.class);
+            if (Files.notExists(FILE)) saveDefault();
+            INSTANCE = GSON.fromJson(Files.readString(FILE), TallerTorchesConfig.class);
         } catch (IOException | JsonSyntaxException e) {
-            // in caso di errore usa default in memoria e logga lo stacktrace
-            e.printStackTrace();
-            INSTANCE = new TallerTorchesConfig();
+            LOGGER.warn("Failed to load config; falling back to defaults", e);
+            INSTANCE = new TallerTorchesConfig();          // fallback
         }
+        INSTANCE.computeDerived();
     }
 
     private static void saveDefault() throws IOException {
-        String json = GSON.toJson(new TallerTorchesConfig());
         Files.createDirectories(FILE.getParent());
-        Files.writeString(FILE, json);
+        Files.writeString(FILE, GSON.toJson(new TallerTorchesConfig()));
+    }
+
+    /* ---- calcola offset_y / offset_face ogni volta che cambia torch_height_px ---- */
+    private void computeDerived() {
+        double deltaPx = torch_height_px - VANILLA_PX;
+        offset_y    =  deltaPx / 16.0;
+        offset_face = Math.abs(deltaPx) * TAN_22_5 / 16.0;
     }
 }

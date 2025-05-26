@@ -14,17 +14,16 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(WallTorchBlock.class)
 public abstract class WallTorchBlockMixin {
-
     @ModifyArgs(
             method = "randomDisplayTick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)V")
     )
-    private void tallerTorches$shift(Args args,
-                                     BlockState state,
-                                     World world,
-                                     BlockPos pos,
-                                     Random random) {
+    private void tt$shift(Args args,
+                          BlockState state,
+                          World world,
+                          BlockPos pos,
+                          Random random) {
 
         double yOff   = TallerTorchesConfig.get().offset_y;
         double faceOff= TallerTorchesConfig.get().offset_face;
