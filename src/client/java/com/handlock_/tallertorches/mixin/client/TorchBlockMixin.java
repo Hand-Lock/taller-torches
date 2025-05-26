@@ -1,25 +1,22 @@
 package com.handlock_.tallertorches.mixin.client;
 
-import net.minecraft.block.TorchBlock;            // <- classe corretta
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.world.World;
+import net.minecraft.block.TorchBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(TorchBlock.class)
 public abstract class TorchBlockMixin {
-	@Redirect(
+
+	private static final double OFFSET = 0.1875D;   // 3 pixel = 3/16 blocco
+
+	@ModifyArg(
 			method = "randomDisplayTick",
 			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particle/ParticleEffect;" +
-							"DDDDDD)V")
+					target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)V"),
+			index = 2   // l’argomento Y
 	)
-	private void tallerTorches$raiseStanding(
-			World world, ParticleEffect effect,
-			double x, double y, double z,
-			double vx, double vy, double vz) {
-
-		world.addParticle(effect, x, y + 0.1875D, z, vx, vy, vz);   // +3 px
+	private double tallerTorches$raiseY(double y) {
+		return y + OFFSET;
 	}
 }
