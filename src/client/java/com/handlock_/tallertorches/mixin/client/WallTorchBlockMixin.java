@@ -1,5 +1,6 @@
 package com.handlock_.tallertorches.mixin.client;
 
+import com.handlock_.tallertorches.TallerTorchesConfig;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallTorchBlock;
 import net.minecraft.util.math.BlockPos;
@@ -14,9 +15,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(WallTorchBlock.class)
 public abstract class WallTorchBlockMixin {
 
-    private static final double OFFSET_Y    = 0.1875D; // +3 px
-    private static final double OFFSET_FACE = 0.0625D; // +1 px dalla parete
-
     @ModifyArgs(
             method = "randomDisplayTick",
             at = @At(value = "INVOKE",
@@ -28,23 +26,18 @@ public abstract class WallTorchBlockMixin {
                                      BlockPos pos,
                                      Random random) {
 
-        /* Indici in Args:
-           0 = ParticleEffect
-           1 = x
-           2 = y
-           3 = z
-        */
+        double yOff   = TallerTorchesConfig.get().offset_y;
+        double faceOff= TallerTorchesConfig.get().offset_face;
 
-        // Alza la particella
-        args.set(2, ((double) args.get(2)) + OFFSET_Y);
+        // 0 = effect, 1 = x, 2 = y, 3 = z
+        args.set(2, ((double) args.get(2)) + yOff);
 
-        // Sposta 1 px fuori dal muro
         Direction dir = state.get(WallTorchBlock.FACING);
         switch (dir) {
-            case NORTH -> args.set(3, ((double) args.get(3)) - OFFSET_FACE); // z–
-            case SOUTH -> args.set(3, ((double) args.get(3)) + OFFSET_FACE); // z+
-            case WEST  -> args.set(1, ((double) args.get(1)) - OFFSET_FACE); // x–
-            case EAST  -> args.set(1, ((double) args.get(1)) + OFFSET_FACE); // x+
+            case NORTH -> args.set(3, ((double) args.get(3)) - faceOff);
+            case SOUTH -> args.set(3, ((double) args.get(3)) + faceOff);
+            case WEST  -> args.set(1, ((double) args.get(1)) - faceOff);
+            case EAST  -> args.set(1, ((double) args.get(1)) + faceOff);
         }
     }
 }

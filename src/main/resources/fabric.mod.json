@@ -3,7 +3,7 @@
 	"id": "tallertorches",
 	"version": "${version}",
 	"name": "Taller Torches",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Adds taller torches!",
 	"authors": [
 		"HandLock_"
 	],
