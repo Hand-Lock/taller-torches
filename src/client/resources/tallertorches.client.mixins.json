@@ -4,7 +4,9 @@
 	"package": "com.handlock_.tallertorches.mixin.client",
 	"client": [
 		"TorchBlockMixin",
-		"WallTorchBlockMixin"
+		"WallTorchBlockMixin",
+		"RedstoneTorchMixin",
+		"WallRedstoneTorchMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

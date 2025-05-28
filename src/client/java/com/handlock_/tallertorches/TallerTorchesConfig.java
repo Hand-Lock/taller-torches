@@ -3,7 +3,6 @@
  * Copyright (C) 2025 HandLock_
  */
 
-
 package com.handlock_.tallertorches;
 
 import com.google.gson.Gson;
@@ -17,41 +16,50 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/** Singleton con un solo parametro: altezza torcia in px (vanilla = 10). */
+/**
+ * Configurazione (singleton) di Taller Torches.
+ * <p>
+ *  ─ {@code torch_height_px}   : altezza in pixel della texture (vanilla = 10).<br>
+ *  ─ {@code include_redstone}  : applica il tweak anche alle redstone-torch.
+ */
 public final class TallerTorchesConfig {
 
+    /*────────────────────────── logger & I/O ───────────────────────────*/
     private static final Logger LOGGER = LoggerFactory.getLogger("TallerTorches");
+    private static final Gson   GSON   = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path   FILE   = FabricLoader.getInstance()
+            .getConfigDir()
+            .resolve("tallertorches.json");
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path FILE = FabricLoader.getInstance()
-            .getConfigDir().resolve("tallertorches.json");
+    /*────────────────────────── opzioni UTENTE ─────────────────────────*/
+    /** Altezza della texture torch.png in pixel (10 = vanilla). */
+    public int torch_height_px = 13;
 
-    // ---------------------- campo esposto all'utente ----------------------
-    public int torch_height_px = 13;          // default: torcia "più lunga" di 3 px
+    /** Estende il comportamento a (wall-)redstone-torch. */
+    public boolean include_redstone = false;
 
-    // ---------------------- derivate, NON salvate ------------------------
-    public transient double offset_y;         // +Δpx / 16
-    public transient double offset_face;      // |Δpx| * tan(22.5°) / 16
+    /*────────────────────────── derivate, NON salvate ──────────────────*/
+    public transient double offset_y;    // +Δpx / 16
+    public transient double offset_face; // |Δpx| · tan 22.5° / 16
 
+    /*────────────────────────── impl. singleton ────────────────────────*/
     private static TallerTorchesConfig INSTANCE;
-    private static final int VANILLA_PX = 10;
-    private static final double TAN_22_5 = Math.tan(Math.toRadians(22.5));
+    private static final int    VANILLA_PX = 10;
+    private static final double TAN_22_5   = Math.tan(Math.toRadians(22.5));
 
-    /* --------------------------------------------------------------------- */
     public static TallerTorchesConfig get() {
         if (INSTANCE == null) load();
         return INSTANCE;
     }
 
-    /* ---- IO ---------------------------------------------------------------- */
-
+    /*────────────────────────── caricamento/salvataggio ───────────────*/
     private static void load() {
         try {
             if (Files.notExists(FILE)) saveDefault();
             INSTANCE = GSON.fromJson(Files.readString(FILE), TallerTorchesConfig.class);
         } catch (IOException | JsonSyntaxException e) {
             LOGGER.warn("Failed to load config; falling back to defaults", e);
-            INSTANCE = new TallerTorchesConfig();          // fallback
+            INSTANCE = new TallerTorchesConfig(); // fallback
         }
         INSTANCE.computeDerived();
     }
@@ -61,9 +69,9 @@ public final class TallerTorchesConfig {
         Files.writeString(FILE, GSON.toJson(new TallerTorchesConfig()));
     }
 
-    /* ---- calcola offset_y / offset_face ogni volta che cambia torch_height_px ---- */
+    /*────────────────────────── calcoli derivati ───────────────────────*/
     private void computeDerived() {
-        double deltaPx = torch_height_px - VANILLA_PX;
+        double deltaPx   = torch_height_px - VANILLA_PX;
         offset_y    =  deltaPx / 16.0;
         offset_face = Math.abs(deltaPx) * TAN_22_5 / 16.0;
     }

@@ -1,6 +1,5 @@
 /*
  * SPDX-License-Identifier: LGPL-3.0-or-later
- * Copyright (C) 2025 HandLock_
  */
 
 package com.handlock_.tallertorches.mixin.client;
@@ -9,8 +8,8 @@ import com.handlock_.tallertorches.TallerTorchesConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.WallRedstoneTorchBlock;
 import net.minecraft.block.WallTorchBlock;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
@@ -22,16 +21,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-/**
- * Mixiamo solo WallTorchBlock (il variant redstone ne eredita).
- */
-@Mixin(WallTorchBlock.class)
-public abstract class WallTorchBlockMixin {
+/** Particelle + hit-box/outline per le wall-redstone-torch. */
+@Mixin(WallRedstoneTorchBlock.class)
+public abstract class WallRedstoneTorchMixin {
 
-    /*────────── particelle ─────────────────────────────────────────────*/
+    /*─── particelle ──────────────────────────────────────────────────*/
     @ModifyArgs(
             method = "randomDisplayTick",
             at     = @At(value = "INVOKE",
@@ -43,9 +40,7 @@ public abstract class WallTorchBlockMixin {
                           BlockPos pos,
                           Random random) {
 
-        if (state.isOf(Blocks.REDSTONE_WALL_TORCH)
-                && !TallerTorchesConfig.get().include_redstone)
-            return;                           // nix offset
+        if (!TallerTorchesConfig.get().include_redstone) return;
 
         double yOff    = TallerTorchesConfig.get().offset_y;
         double faceOff = TallerTorchesConfig.get().offset_face;
@@ -61,7 +56,7 @@ public abstract class WallTorchBlockMixin {
         }
     }
 
-    /*────────── hit-box / outline ──────────────────────────────────────*/
+    /*─── outline / collision ─────────────────────────────────────────*/
     @Inject(method = { "getOutlineShape", "getCollisionShape" },
             at = @At("RETURN"), cancellable = true)
     private void tt$stretch(BlockState state,
@@ -70,14 +65,12 @@ public abstract class WallTorchBlockMixin {
                             ShapeContext ctx,
                             CallbackInfoReturnable<VoxelShape> cir) {
 
-        if (state.isOf(Blocks.REDSTONE_WALL_TORCH)
-                && !TallerTorchesConfig.get().include_redstone)
-            return;                           // shape vanilla
+        if (!TallerTorchesConfig.get().include_redstone) return;
 
         int    deltaPx  = TallerTorchesConfig.get().torch_height_px - 10;
         double extraY   = deltaPx > 0 ? deltaPx / 16.0 : 0.0;
         double extraXZ  = TallerTorchesConfig.get().offset_face;
-        if (extraY == 0 && extraXZ == 0) return;
+        if (extraY == 0 && extraXZ == 0) return;        // vanilla OK
 
         Box box = cir.getReturnValue().getBoundingBox();
         double minX = box.minX, maxX = box.maxX;
@@ -92,9 +85,8 @@ public abstract class WallTorchBlockMixin {
             case EAST  -> maxX = Math.min(maxX + extraXZ, 1.0);
         }
 
-        VoxelShape stretched = Block.createCuboidShape(
+        cir.setReturnValue(Block.createCuboidShape(
                 minX * 16, box.minY * 16, minZ * 16,
-                maxX * 16, maxY  * 16,   maxZ * 16);
-        cir.setReturnValue(stretched);
+                maxX * 16, maxY  * 16,   maxZ * 16));
     }
 }
