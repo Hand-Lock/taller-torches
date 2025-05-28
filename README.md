@@ -60,10 +60,10 @@ At load-time the mod reads a single JSON file:
 ## 🖼️ Example Heights
 
 | Torch sprite     | `torch_height_px` | Result                                              |
-| ---------------- | ----------------- | --------------------------------------------------- |
+| ---------------- | ----------------- |-----------------------------------------------------|
 | **Vanilla**      | 10                | Unchanged (particles & hit-box remain vanilla)      |
 | **Indev**        | 13 *(default)*    | Flame sits neatly on the tip; hit-box ≈ 30 % taller |
-| **Custom 16 px** | 16                | Ultra-tall torches? Just set 16 and reload!         |
+| **Custom 16 px** | 16                | Ultra-tall torches? Just set 16 and restart!        |
 
 *(Values beyond 16 px are supported but may clip ceilings in cramped builds.)*
 
