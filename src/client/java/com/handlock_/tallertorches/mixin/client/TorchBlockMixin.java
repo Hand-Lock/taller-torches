@@ -1,6 +1,5 @@
 /*
  * SPDX-License-Identifier: LGPL-3.0-or-later
- * Copyright (C) 2025 HandLock_
  */
 
 package com.handlock_.tallertorches.mixin.client;
@@ -20,13 +19,12 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * Mixiamo solo TorchBlock (le redstone ereditano).
- */
+/** Mixin base (vale anche per la redstone-torch verticale). */
+@SuppressWarnings("ConstantConditions")
 @Mixin(TorchBlock.class)
 public abstract class TorchBlockMixin {
 
-	/*────────── particelle ─────────────────────────────────────────────*/
+	/*─── particelle ──────────────────────────────────────────────────*/
 	@ModifyArg(
 			method = "randomDisplayTick",
 			at     = @At(value = "INVOKE",
@@ -34,14 +32,14 @@ public abstract class TorchBlockMixin {
 							+ "(Lnet/minecraft/particle/ParticleEffect;DDDDDD)V"),
 			index  = 2)
 	private double tt$raiseY(double y) {
-		if ((Object) this instanceof RedstoneTorchBlock           // redstone?
+		if ((Object) this instanceof RedstoneTorchBlock
 				&& !TallerTorchesConfig.get().include_redstone)
-			return y;                       // lascia vanilla
+			return y;
 
 		return y + TallerTorchesConfig.get().offset_y;
 	}
 
-	/*────────── hit-box / outline ──────────────────────────────────────*/
+	/*─── hit-box / outline ───────────────────────────────────────────*/
 	@Inject(method = { "getOutlineShape", "getCollisionShape" },
 			at = @At("HEAD"), cancellable = true)
 	private void tt$shape(BlockState state,
@@ -52,13 +50,14 @@ public abstract class TorchBlockMixin {
 
 		if ((Object) this instanceof RedstoneTorchBlock
 				&& !TallerTorchesConfig.get().include_redstone)
-			return;                          // shape vanilla
+			return;                                // vanilla shape
 
 		int deltaPx = TallerTorchesConfig.get().torch_height_px - 10;
-		if (deltaPx <= 0) return;            // vanilla OK
+		if (deltaPx == 0) return;                  // vanilla
 
-		double top = 10 + deltaPx;           // maxY in pixel
-		VoxelShape shape = Block.createCuboidShape(6, 0, 6, 10, top, 10);
-		cir.setReturnValue(shape);
+		double top = 10 + deltaPx;                 // può essere <10
+		top = Math.max(2, Math.min(16, top));      // clamp di sicurezza
+
+		cir.setReturnValue(Block.createCuboidShape(6, 0, 6, 10, top, 10));
 	}
 }

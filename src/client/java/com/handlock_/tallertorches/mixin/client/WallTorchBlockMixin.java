@@ -1,6 +1,5 @@
 /*
  * SPDX-License-Identifier: LGPL-3.0-or-later
- * Copyright (C) 2025 HandLock_
  */
 
 package com.handlock_.tallertorches.mixin.client;
@@ -22,16 +21,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-/**
- * Mixiamo solo WallTorchBlock (il variant redstone ne eredita).
- */
+/** Mixin per le wall-torch vanilla (le redstone hanno un mixin dedicato). */
 @Mixin(WallTorchBlock.class)
 public abstract class WallTorchBlockMixin {
 
-    /*────────── particelle ─────────────────────────────────────────────*/
+    /*─── particelle ──────────────────────────────────────────────────*/
     @ModifyArgs(
             method = "randomDisplayTick",
             at     = @At(value = "INVOKE",
@@ -45,7 +42,7 @@ public abstract class WallTorchBlockMixin {
 
         if (state.isOf(Blocks.REDSTONE_WALL_TORCH)
                 && !TallerTorchesConfig.get().include_redstone)
-            return;                           // nix offset
+            return;
 
         double yOff    = TallerTorchesConfig.get().offset_y;
         double faceOff = TallerTorchesConfig.get().offset_face;
@@ -61,7 +58,7 @@ public abstract class WallTorchBlockMixin {
         }
     }
 
-    /*────────── hit-box / outline ──────────────────────────────────────*/
+    /*─── outline / collision ─────────────────────────────────────────*/
     @Inject(method = { "getOutlineShape", "getCollisionShape" },
             at = @At("RETURN"), cancellable = true)
     private void tt$stretch(BlockState state,
@@ -72,17 +69,17 @@ public abstract class WallTorchBlockMixin {
 
         if (state.isOf(Blocks.REDSTONE_WALL_TORCH)
                 && !TallerTorchesConfig.get().include_redstone)
-            return;                           // shape vanilla
+            return;
 
-        int    deltaPx  = TallerTorchesConfig.get().torch_height_px - 10;
-        double extraY   = deltaPx > 0 ? deltaPx / 16.0 : 0.0;
-        double extraXZ  = TallerTorchesConfig.get().offset_face;
+        int    deltaPx = TallerTorchesConfig.get().torch_height_px - 10;
+        double extraY  = deltaPx / 16.0;           // può essere negativo
+        double extraXZ = TallerTorchesConfig.get().offset_face;
         if (extraY == 0 && extraXZ == 0) return;
 
         Box box = cir.getReturnValue().getBoundingBox();
         double minX = box.minX, maxX = box.maxX;
         double minZ = box.minZ, maxZ = box.maxZ;
-        double maxY = box.maxY + extraY;
+        double maxY = box.maxY + extraY;           // su/giù
 
         Direction d = state.get(WallTorchBlock.FACING);
         switch (d) {
@@ -92,9 +89,8 @@ public abstract class WallTorchBlockMixin {
             case EAST  -> maxX = Math.min(maxX + extraXZ, 1.0);
         }
 
-        VoxelShape stretched = Block.createCuboidShape(
+        cir.setReturnValue(Block.createCuboidShape(
                 minX * 16, box.minY * 16, minZ * 16,
-                maxX * 16, maxY  * 16,   maxZ * 16);
-        cir.setReturnValue(stretched);
+                maxX * 16, maxY  * 16,   maxZ * 16));
     }
 }

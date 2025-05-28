@@ -27,12 +27,12 @@ At load-time the mod reads a single JSON file:
 // config/tallertorches.json
 {
   "torch_height_px": 13,   // 10 = vanilla, 13 = Indev (default)
-  "include_redstone": false // toggle: also adjust redstone torches
+  "include_redstone": true // toggle: also adjust redstone torches
 }
 ```
 
 1. **torch\_height\_px** — height of your *torch.png* in pixels.
-2. **include\_redstone** — when *true*, applies the same adjustments to redstone torches & wall redstone torches; leave *false* to keep their vanilla shape.
+2. **include\_redstone** — when *true*, applies the same adjustments to redstone torches & wall redstone torches; set *false* to keep their vanilla shape.
 3. Everything else (collision, outline, flame/smoke offsets, wall side-shift) is computed automatically.
 
 ---
@@ -66,6 +66,8 @@ At load-time the mod reads a single JSON file:
 | **Custom 16 px** | 16                | Ultra-tall torches? Just set 16 and reload!         |
 
 *(Values beyond 16 px are supported but may clip ceilings in cramped builds.)*
+
+*(Values below 10px are also supported, the minimum is 2px.)*
 
 ---
 

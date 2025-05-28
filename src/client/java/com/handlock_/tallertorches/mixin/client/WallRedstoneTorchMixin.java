@@ -1,6 +1,5 @@
 /*
  * SPDX-License-Identifier: LGPL-3.0-or-later
- * Copyright (C) 2025 HandLock_
  */
 
 package com.handlock_.tallertorches.mixin.client;
@@ -25,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-/** Particelle + hit-box/outline per le wall-redstone-torch. */
+/** Particelle + outline per wall-redstone-torch (riscrive le sue shape). */
 @Mixin(WallRedstoneTorchBlock.class)
 public abstract class WallRedstoneTorchMixin {
 
@@ -68,10 +67,10 @@ public abstract class WallRedstoneTorchMixin {
 
         if (!TallerTorchesConfig.get().include_redstone) return;
 
-        int    deltaPx  = TallerTorchesConfig.get().torch_height_px - 10;
-        double extraY   = deltaPx > 0 ? deltaPx / 16.0 : 0.0;
-        double extraXZ  = TallerTorchesConfig.get().offset_face;
-        if (extraY == 0 && extraXZ == 0) return;        // vanilla OK
+        int    deltaPx = TallerTorchesConfig.get().torch_height_px - 10;
+        double extraY  = deltaPx / 16.0;
+        double extraXZ = TallerTorchesConfig.get().offset_face;
+        if (extraY == 0 && extraXZ == 0) return;
 
         Box box = cir.getReturnValue().getBoundingBox();
         double minX = box.minX, maxX = box.maxX;

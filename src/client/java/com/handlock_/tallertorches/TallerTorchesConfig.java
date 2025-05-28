@@ -36,7 +36,7 @@ public final class TallerTorchesConfig {
     public int torch_height_px = 13;
 
     /** Estende il comportamento a (wall-)redstone-torch. */
-    public boolean include_redstone = false;
+    public boolean include_redstone = true;
 
     /*────────────────────────── derivate, NON salvate ──────────────────*/
     public transient double offset_y;    // +Δpx / 16
@@ -73,6 +73,6 @@ public final class TallerTorchesConfig {
     private void computeDerived() {
         double deltaPx   = torch_height_px - VANILLA_PX;
         offset_y    =  deltaPx / 16.0;
-        offset_face = Math.abs(deltaPx) * TAN_22_5 / 16.0;
+        offset_face = deltaPx * TAN_22_5 / 16.0;   // può essere negativo
     }
 }
