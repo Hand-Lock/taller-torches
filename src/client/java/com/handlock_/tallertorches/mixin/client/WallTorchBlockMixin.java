@@ -1,5 +1,6 @@
 /*
  * SPDX-License-Identifier: LGPL-3.0-or-later
+ * Copyright (C) 2025 HandLock_
  */
 
 package com.handlock_.tallertorches.mixin.client;
@@ -24,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-/** Mixin per le wall-torch vanilla (le redstone hanno un mixin dedicato). */
+
 @Mixin(WallTorchBlock.class)
 public abstract class WallTorchBlockMixin {
 
